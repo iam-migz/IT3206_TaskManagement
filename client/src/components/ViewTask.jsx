@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import api from "../utils/axiosInstance";
+import DeleteTask from "./DeleteTask";
 
 function ViewTask() {
   const [tasks, setTasks] = useState([]);
@@ -25,6 +26,19 @@ function ViewTask() {
     };
   }, []);
 
+  const handleDelete = async (taskId, fetchTasks) => {
+    try {
+      await api.delete("/", { data: { id: taskId } }); // Send task ID in request body
+      console.log("Task deleted successfully");
+      const updatedTasks = tasks.filter(task => task.id !== taskId);
+      setTasks(updatedTasks);
+    } catch (error) {
+      console.error("Error deleting task:", error);
+      console.log("Error response:", error.response);
+    }
+  };
+  
+
   return (
     <div>
       <div>
@@ -33,6 +47,7 @@ function ViewTask() {
             {tasks.map((task) => (
               <li key={task.id}>
                 {task.title} - {task.description} (ID: {task.id})
+                <DeleteTask taskId={task.id} onDelete={handleDelete} />
               </li>
             ))}
           </ul>
