@@ -4,33 +4,30 @@
 GET http://localhost:4000/api/
 
 
-
-### EDIT TASKS
-PATCH http://localhost:4000/api/
-Content-Type: application/json
-
-{
-  "id": "dFQLjlvvR02iAa584pM6",
-  "title": "updatedTitle",
-  "description": "updatedDescription"
-}
-
-
 ### CREATE TASK
 
 POST http://localhost:4000/api/
 Content-Type: application/json
 
 {
-    "title": "myTitle",
-    "description": "myDescription"
+    "title": "delete",
+    "description": "myDescription",
+    "status": false
+}
+
+
+
+### EDIT TASKS
+PUT http://localhost:4000/api/UPmD2RDoWbfx6Nf8WCSu
+Content-Type: application/json
+
+{
+  "title": "updatedTitle",
+  "description": "updatedDescription",
+  "status": false
 }
 
 
 ### DELETE TASKS
-DELETE http://localhost:4000/api/
+DELETE http://localhost:4000/api/UPmD2RDoWbfx6Nf8WCSu
 Content-Type: application/json
-
-{
-    "id": "dFQLjlvvR02iAa584pM6"
-}
