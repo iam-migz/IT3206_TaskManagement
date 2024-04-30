@@ -6,6 +6,9 @@ import {
   getDocs,
   updateDoc,
   deleteDoc,
+  query,
+  where,
+  limit,
 } from "firebase/firestore";
 import db from "../firebase.js";
 
@@ -18,68 +21,95 @@ export async function getAllTasks(req, res, next) {
       id: doc.id,
       ...doc.data(),
     }));
-    return res.status(200).json(tasks);
+    return res.json(tasks);
   } catch (error) {
-    console.error(error);
-    return res.status(500).send("Error fetching tasks");
+    next(error);
   }
 }
 
 export async function createTask(req, res, next) {
   try {
-    const { title, description } = req.body;
+    const { title, description, status } = req.body;
+
+    // check if title already exists
+    const q = query(tasksRef, where("title", "==", title), limit(1));
+    const querySnap = await getDocs(q);
+    if (!querySnap.empty) {
+      return res.status(400).json({ message: "Title already exists" });
+    }
 
     await addDoc(tasksRef, {
       title,
       description,
+      status,
     });
 
-    return res.status(201).send("Task created successfully");
+    return res.sendStatus(201);
   } catch (error) {
-    console.error(error);
-    return res.status(500).send("Error creating task");
+    next(error);
   }
 }
 
 export async function editTask(req, res, next) {
   try {
-    const { id, title, description } = req.body;
-    const taskRef = doc(tasksRef, id);
+    const { taskId } = req.params;
+    const { title, description } = req.body;
+    const taskRef = doc(tasksRef, taskId);
 
     // Check if task exists before updating
     const taskSnap = await getDoc(taskRef);
-    if (!taskSnap.exists) {
-      return res.status(404).send("Task not found");
+    if (!taskSnap.exists()) {
+      return res.status(404).json({ message: "Task not found" });
     }
 
     await updateDoc(taskRef, {
       title,
-      description,
+      description
     });
 
-    return res.status(200).send("Task updated successfully");
+    return res.sendStatus(200);
   } catch (error) {
-    console.error(error);
-    return res.status(500).send("Error updating task");
+    next(error);
   }
 }
 
 export async function deleteTask(req, res, next) {
   try {
-    const { id } = req.body;
-    const taskRef = doc(tasksRef, id);
+    const { taskId } = req.params;
+    const taskRef = doc(tasksRef, taskId);
 
     // Check if task exists before deleting
     const taskSnap = await getDoc(taskRef);
-    if (!taskSnap.exists) {
-      return res.status(404).send("Task not found");
+    if (!taskSnap.exists()) {
+      return res.status(404).json({ message: "Task not found" });
     }
 
     await deleteDoc(taskRef);
 
-    return res.status(200).send("Task deleted successfully");
+    return res.sendStatus(200);
   } catch (error) {
-    console.error(error);
-    return res.status(500).send("Error deleting task");
+    next(error);
+  }
+}
+
+export async function updateTaskStatus(req, res, next) {
+  try {
+    const { taskId } = req.params;
+    const taskRef = doc(tasksRef, taskId);
+
+    // Check if task exists
+    const taskSnap = await getDoc(taskRef);
+    if (!taskSnap.exists()) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    const { status } = taskSnap.data();
+    await updateDoc(taskRef, {
+      status: !status,
+    });
+
+    return res.sendStatus(200);
+  } catch (error) {
+    next(error);
   }
 }
