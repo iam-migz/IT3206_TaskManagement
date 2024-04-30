@@ -8,7 +8,7 @@ import {
   deleteDoc,
   query,
   where,
-  limit
+  limit,
 } from "firebase/firestore";
 import db from "../firebase.js";
 
@@ -53,7 +53,7 @@ export async function createTask(req, res, next) {
 export async function editTask(req, res, next) {
   try {
     const { taskId } = req.params;
-    const { title, description, status } = req.body;
+    const { title, description } = req.body;
     const taskRef = doc(tasksRef, taskId);
 
     // Check if task exists before updating
@@ -64,8 +64,7 @@ export async function editTask(req, res, next) {
 
     await updateDoc(taskRef, {
       title,
-      description,
-      status
+      description
     });
 
     return res.sendStatus(200);
@@ -84,9 +83,30 @@ export async function deleteTask(req, res, next) {
     if (!taskSnap.exists()) {
       return res.status(404).json({ message: "Task not found" });
     }
-    console.log('taskSnap.exists', taskSnap.exists)
 
     await deleteDoc(taskRef);
+
+    return res.sendStatus(200);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function updateTaskStatus(req, res, next) {
+  try {
+    const { taskId } = req.params;
+    const taskRef = doc(tasksRef, taskId);
+
+    // Check if task exists
+    const taskSnap = await getDoc(taskRef);
+    if (!taskSnap.exists()) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    const { status } = taskSnap.data();
+    await updateDoc(taskRef, {
+      status: !status,
+    });
 
     return res.sendStatus(200);
   } catch (error) {

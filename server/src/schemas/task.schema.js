@@ -14,7 +14,7 @@ const payload = {
       })
       .min(3, "Description too short - 3 chars minimum"),
     status: z.boolean({
-      required_error: "Status is required"
+      required_error: "Status is required",
     }),
   }),
 };
@@ -32,10 +32,10 @@ export const createTaskSchema = z.object({
 });
 
 export const updateTaskSchema = z.object({
-  ...payload,
+  ...{ body: payload.body.omit({ status: true }) },
   ...params,
 });
 
-export const deleteTaskSchema = z.object({
+export const taskIdParams = z.object({
   ...params,
 });

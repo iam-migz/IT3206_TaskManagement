@@ -18,16 +18,21 @@ Content-Type: application/json
 
 
 ### EDIT TASKS
-PUT http://localhost:4000/api/UPmD2RDoWbfx6Nf8WCSu
+PUT http://localhost:4000/api/eWZt57TWfXwPmmLNs4Ru
 Content-Type: application/json
 
 {
-  "title": "updatedTitle",
-  "description": "updatedDescription",
-  "status": false
+  "title": "updatedTitle123",
+  "description": "updatedDescription"
 }
 
 
 ### DELETE TASKS
 DELETE http://localhost:4000/api/UPmD2RDoWbfx6Nf8WCSu
+Content-Type: application/json
+
+
+### UPDATE TASK STATUS
+
+PATCH http://localhost:4000/api/eWZt57TWfXwPmmLNs4Ru
 Content-Type: application/json
