@@ -4,7 +4,7 @@ import {
   createTask,
   editTask,
   deleteTask,
-  updateTaskStatus
+  updateTaskStatus,
 } from "./controllers/task.controller.js";
 import validateResource from "./middlewares/validateResource.js";
 import {
@@ -21,5 +21,7 @@ router.put("/:taskId", validateResource(updateTaskSchema), editTask);
 router.delete("/:taskId", validateResource(taskIdParams), deleteTask);
 router.patch("/:taskId", validateResource(taskIdParams), updateTaskStatus);
 
+// Health Check
+router.get("/check", (req, res) => res.sendStatus(200));
 
 export default router;

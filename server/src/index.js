@@ -12,16 +12,8 @@ app.use(
     origin: "*",
   })
 );
-app.use(
-  helmet({
-    contentSecurityPolicy: false,
-  })
-);
+app.use(helmet());
 app.use(express.json());
-
-// app check
-app.get("/", (req, res) => res.sendStatus(200));
-
 app.use("/api", routes);
 app.use(errorHandler);
 
