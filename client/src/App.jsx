@@ -1,37 +1,39 @@
 import { useEffect, useState } from "react";
-import ViewTask from "./components/ViewTask";
-import AddTask from "./components/AddTask";
 import {
   Button,
   Checkbox,
   FormControlLabel,
-  FormGroup,
-  IconButton,
   TextField,
-  Typography,
 } from "@mui/material";
 import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
-import DeleteIcon from "@mui/icons-material/Delete";
-import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
-import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
-import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import api from "./utils/axiosInstance";
-import EditIcon from "@mui/icons-material/Edit";
 import EditTaskModal from "./components/EditTaskModal";
+import Swal from "sweetalert2";
+import TaskList from "./components/TaskList";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+
+const darkTheme = createTheme({
+  palette: {
+    mode: "dark",
+  },
+});
 
 function App() {
   const [tasks, setTasks] = useState([]);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
+  const [completedTasks, setCompletedTasks] = useState([]);
+  const [uncompletedTasks, setUncompletedTasks] = useState([]);
+
   const [tabValue, setTabValue] = useState("1");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isArchivedChecked, setIsArchivedChecked] = useState(true);
 
   const [editId, setEditId] = useState("");
   const [editTitle, setEditTitle] = useState("");
@@ -55,18 +57,36 @@ function App() {
       getTasks();
     } catch (error) {
       console.error("Error adding task:", error);
-      // TODO toast errors
     }
   };
 
   const deleteTask = async (taskId) => {
-    try {
-      // TODO warning toast
-      await api.delete(`/${taskId}`);
-      const updatedTasks = tasks.filter((task) => task.id !== taskId);
-      setTasks(updatedTasks);
-    } catch (error) {
-      console.error("Error deleting task:", error);
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+      background: "#242424",
+      color: "white",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await api.delete(`/${taskId}`);
+        const updatedTasks = tasks.filter((task) => task.id !== taskId);
+        setTasks(updatedTasks);
+      } catch (error) {
+        console.error("Error deleting task:", error);
+      }
+
+      Swal.fire({
+        title: "Deleted!",
+        text: "Your file has been deleted.",
+        icon: "success",
+      });
     }
   };
 
@@ -99,128 +119,122 @@ function App() {
     }
   };
 
+  const openModal = (id, title, description) => {
+    setIsModalOpen(true);
+    setEditId(id);
+    setEditTitle(title);
+    setEditDescription(description);
+  };
+
   useEffect(() => {
+    // get tasks when component first renders
     getTasks();
-    console.log("tasks", tasks);
   }, []);
+
+  useEffect(() => {
+    // Update completed and uncompleted tasks whenever tasks change
+    if (!isArchivedChecked) {
+      setUncompletedTasks(tasks);
+      setCompletedTasks([]);
+      return;
+    }
+    const completed = tasks.filter((task) => task.status);
+    const uncompleted = tasks.filter((task) => !task.status);
+    setCompletedTasks(completed);
+    setUncompletedTasks(uncompleted);
+  }, [tasks, isArchivedChecked]);
 
   return (
     <>
-      <Paper className="main-box" elevation={8}>
-        <header className="header">
-          <span>April 29, 2024</span>
-          <span>Task Management</span>
-        </header>
+      <ThemeProvider theme={darkTheme}>
+        <Paper className="main-box" elevation={8}>
+          <header className="header">
+            <span>Task Management</span>
+            <span>
+              {new Date().toLocaleDateString("en-PH", {
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+              })}
+            </span>
+          </header>
 
-        <Box
-          className="form-group"
-          component="form"
-          onSubmit={saveTask}
-          autoComplete="off"
-        >
-          <TextField
-            required
-            inputProps={{ minLength: 3 }}
-            id="form-group__title"
-            label="Title"
-            variant="outlined"
-            size="small"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-          <TextField
-            required
-            id="form-group__description"
-            label="Description"
-            variant="outlined"
-            size="small"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-          <Button type="submit" variant="contained">
-            Create
-          </Button>
-        </Box>
-
-        <TabContext value={tabValue}>
-          <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-            <TabList onChange={(e, newValue) => setTabValue(newValue)}>
-              <Tab label="Active" value="1" />
-              <Tab label="Archived" value="2" />
-            </TabList>
+          <Box
+            className="form-group"
+            component="form"
+            onSubmit={saveTask}
+            autoComplete="off"
+          >
+            <TextField
+              required
+              inputProps={{ minLength: 3 }}
+              id="form-group__title"
+              label="Title"
+              variant="outlined"
+              size="small"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+            <TextField
+              required
+              inputProps={{ minLength: 3 }}
+              id="form-group__description"
+              label="Description"
+              variant="outlined"
+              size="small"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+            <Button type="submit" variant="contained">
+              Create
+            </Button>
           </Box>
-          <TabPanel value="1" sx={{ padding: "0" }}>
-            <div className="task-list">
-              {tasks &&
-                tasks.map((task) => (
-                  <Box className="task-list__task" key={task.title}>
-                    <div className="divider">
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            icon={<RadioButtonUncheckedIcon />}
-                            checkedIcon={<CheckCircleIcon />}
-                            onChange={() => updateTaskStatus(task.id)}
-                            checked={task.status}
-                          />
-                        }
-                        label={
-                          <Typography
-                            sx={{ fontSize: "1.2em", userSelect: "none" }}
-                          >
-                            {task.title}
-                          </Typography>
-                        }
-                      />
-                      <span className="task__description">
-                        {task.description}
-                      </span>
-                    </div>
-                    <div>
-                      <IconButton
-                        onClick={() => {
-                          setIsModalOpen(true);
-                          setEditId(task.id);
-                          setEditTitle(task.title);
-                          setEditDescription(task.description);
-                        }}
-                        color="warning"
-                      >
-                        <EditIcon />
-                      </IconButton>
 
-                      <IconButton
-                        onClick={() => deleteTask(task.id)}
-                        color="error"
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </div>
-                  </Box>
-                ))}
-            </div>
-          </TabPanel>
-          <TabPanel value="2">Archived</TabPanel>
-        </TabContext>
+          <TabContext value={tabValue}>
+            <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+              <TabList onChange={(e, newValue) => setTabValue(newValue)}>
+                <Tab label="Active" value="1" />
+                <Tab label="Archived" value="2" />
+              </TabList>
+            </Box>
+            <TabPanel value="1" sx={{ padding: "0" }}>
+              <TaskList
+                tasks={uncompletedTasks}
+                openModal={openModal}
+                updateTaskStatus={updateTaskStatus}
+                deleteTask={deleteTask}
+              />
+            </TabPanel>
+            <TabPanel value="2" sx={{ padding: "0" }}>
+              <TaskList
+                tasks={completedTasks}
+                openModal={openModal}
+                updateTaskStatus={updateTaskStatus}
+                deleteTask={deleteTask}
+              />
+            </TabPanel>
+          </TabContext>
 
-        <Box className="footer">
-          <FormControlLabel
-            control={<Checkbox defaultChecked />}
-            label="Hide Completed Tasks"
-          />
-        </Box>
-      </Paper>
+          <Box className="footer">
+            <FormControlLabel
+              control={<Checkbox />}
+              label="Hide Completed Tasks"
+              onChange={(e) => setIsArchivedChecked(e.target.checked)}
+              checked={isArchivedChecked}
+            />
+          </Box>
+        </Paper>
 
-      {/* isModalOpen, setIsModalOpen */}
-      <EditTaskModal
-        isModalOpen={isModalOpen}
-        setIsModalOpen={setIsModalOpen}
-        title={editTitle}
-        description={editDescription}
-        setTitle={setEditTitle}
-        setDescription={setEditDescription}
-        onSubmit={updateTask}
-      />
+        <EditTaskModal
+          isModalOpen={isModalOpen}
+          setIsModalOpen={setIsModalOpen}
+          title={editTitle}
+          description={editDescription}
+          setTitle={setEditTitle}
+          setDescription={setEditDescription}
+          onSubmit={updateTask}
+        />
+      </ThemeProvider>
     </>
   );
 }

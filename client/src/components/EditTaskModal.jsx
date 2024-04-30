@@ -24,9 +24,13 @@ function EditTaskModal({
   onSubmit,
 }) {
   return (
-    <Modal open={isModalOpen} onClose={() => setIsModalOpen(false)}>
+    <Modal
+      open={isModalOpen}
+      onClose={() => setIsModalOpen(false)}
+      sx={{ background: "#242424" }}
+    >
       <Box sx={style} component="form" onSubmit={onSubmit} autoComplete="off">
-        <h2>Edit Task</h2>
+        <h2 style={{ color: "white" }}>Edit Task</h2>
         <TextField
           fullWidth
           required
