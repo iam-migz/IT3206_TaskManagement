@@ -50,8 +50,8 @@
 
 
 .task-list {
-  /* max-height: 300px; */
-  overflow: auto;
+  max-height: 250px;
+  overflow-y: auto;
 }
 
 .task-list__task {
@@ -74,4 +74,22 @@
   position: absolute;
   bottom: 0;
   margin-bottom: 1em;
+}
+
+/* Define the scrollbar track */
+::-webkit-scrollbar {
+  width: 8px; /* Width of the scrollbar */
+  background-color: #242424; /* Background color */
+  border-radius: 8px; /* Rounded corners */
+}
+
+/* Define the scrollbar thumb */
+::-webkit-scrollbar-thumb {
+  background-color: #666; /* Color of the thumb */
+  border-radius: 8px; /* Rounded corners */
+}
+
+/* Define the scrollbar thumb on hover */
+::-webkit-scrollbar-thumb:hover {
+  background-color: #ad9494; /* Color of the thumb on hover */
 }
