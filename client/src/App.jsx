@@ -16,6 +16,7 @@ import EditTaskModal from "./components/EditTaskModal";
 import Swal from "sweetalert2";
 import TaskList from "./components/TaskList";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
 
 const darkTheme = createTheme({
   palette: {
