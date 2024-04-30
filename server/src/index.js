@@ -3,13 +3,18 @@ import morgan from "morgan";
 import cors from "cors";
 import routes from "./routes.js";
 import errorHandler from "./middlewares/errorHandler.js";
+import helmet from "helmet";
 
 const app = express();
-app.use(morgan('dev'))
+app.use(morgan("dev"));
 app.use(
   cors({
     origin: "*",
-    credentials: true,
+  })
+);
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
   })
 );
 app.use(express.json());
