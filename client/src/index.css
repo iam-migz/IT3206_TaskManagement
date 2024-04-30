@@ -14,8 +14,19 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  min-width: 460px;
   min-height: 400px;
+}
+
+@media (max-width: 768px) {
+  .main-box {
+    max-width: 70%; 
+  }
+}
+
+@media (max-width: 480px) {
+  .main-box {
+    max-width: 90%; 
+  }
 }
 
 .header {
