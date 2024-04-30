@@ -1,10 +1,6 @@
 import { useEffect, useState } from "react";
-import {
-  Button,
-  Checkbox,
-  FormControlLabel,
-  TextField,
-} from "@mui/material";
+import { Button, Checkbox, FormControlLabel, TextField } from "@mui/material";
+import CircularProgress from "@mui/material/CircularProgress";
 import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
@@ -128,7 +124,18 @@ function App() {
   };
 
   useEffect(() => {
-    // get tasks when component first renders
+    const checkConnection = async () => {
+      console.log(`Running in ${import.meta.env.MODE}`);
+      try {
+        const res = await api.get("/check");
+        console.log("Connected to api", res);
+      } catch (error) {
+        console.log("Could not connect to api");
+        console.log("error", error);
+      }
+    };
+    checkConnection();
+
     getTasks();
   }, []);
 
@@ -199,12 +206,18 @@ function App() {
               </TabList>
             </Box>
             <TabPanel value="1" sx={{ padding: "0" }}>
-              <TaskList
-                tasks={uncompletedTasks}
-                openModal={openModal}
-                updateTaskStatus={updateTaskStatus}
-                deleteTask={deleteTask}
-              />
+              {tasks.length ? (
+                <TaskList
+                  tasks={uncompletedTasks}
+                  openModal={openModal}
+                  updateTaskStatus={updateTaskStatus}
+                  deleteTask={deleteTask}
+                />
+              ) : (
+                <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: '4em' }}>
+                  <CircularProgress />
+                </Box>
+              )}
             </TabPanel>
             <TabPanel value="2" sx={{ padding: "0" }}>
               <TaskList
