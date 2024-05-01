@@ -93,3 +93,16 @@
 ::-webkit-scrollbar-thumb:hover {
   background-color: #ad9494; /* Color of the thumb on hover */
 }
+
+.backdrop {
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: .3em;
+}
+
+.info {
+  font-size: .8em;
+}

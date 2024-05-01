@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button, Checkbox, FormControlLabel, TextField } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
+import Backdrop from "@mui/material/Backdrop";
 import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
@@ -28,13 +29,14 @@ function App() {
   const [completedTasks, setCompletedTasks] = useState([]);
   const [uncompletedTasks, setUncompletedTasks] = useState([]);
 
-  const [tabValue, setTabValue] = useState("1");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isArchivedChecked, setIsArchivedChecked] = useState(true);
-
   const [editId, setEditId] = useState("");
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
+
+  const [tabValue, setTabValue] = useState("1");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isArchivedChecked, setIsArchivedChecked] = useState(true);
+  const [isBackdropOpen, setIsBackdropOpen] = useState(true);
 
   const getTasks = async () => {
     try {
@@ -128,6 +130,7 @@ function App() {
       console.log(`Running in ${import.meta.env.MODE}`);
       try {
         const res = await api.get("/check");
+        setIsBackdropOpen(false);
         console.log("Connected to api", res);
       } catch (error) {
         console.log("Could not connect to api");
@@ -206,18 +209,12 @@ function App() {
               </TabList>
             </Box>
             <TabPanel value="1" sx={{ padding: "0" }}>
-              {tasks.length ? (
-                <TaskList
-                  tasks={uncompletedTasks}
-                  openModal={openModal}
-                  updateTaskStatus={updateTaskStatus}
-                  deleteTask={deleteTask}
-                />
-              ) : (
-                <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: '4em' }}>
-                  <CircularProgress />
-                </Box>
-              )}
+              <TaskList
+                tasks={uncompletedTasks}
+                openModal={openModal}
+                updateTaskStatus={updateTaskStatus}
+                deleteTask={deleteTask}
+              />
             </TabPanel>
             <TabPanel value="2" sx={{ padding: "0" }}>
               <TaskList
@@ -248,6 +245,19 @@ function App() {
           setDescription={setEditDescription}
           onSubmit={updateTask}
         />
+
+        <Backdrop
+          sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
+          open={isBackdropOpen}
+        >
+          <div className="backdrop">
+            <CircularProgress color="inherit" />
+            <span>Please wait</span>
+            <span className="info">
+              This could take upto 50 seconds if the server had a coldstart
+            </span>
+          </div>
+        </Backdrop>
       </ThemeProvider>
     </>
   );
