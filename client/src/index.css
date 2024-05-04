@@ -1,6 +1,6 @@
 :root {
   font-family: 'Roboto', Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  background-color: #242424;
+  background-color: oklch(25.3267% 0.015896 252.417568 /1);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -15,6 +15,7 @@
   left: 50%;
   transform: translate(-50%, -50%);
   min-height: 400px;
+  background-color: oklch(21.1484% 0.01165 254.087939 / 1);
 }
 
 @media (max-width: 768px) {

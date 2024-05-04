@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Button, Checkbox, FormControlLabel, TextField } from "@mui/material";
+import { Checkbox, FormControlLabel } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
 import Backdrop from "@mui/material/Backdrop";
 import Tab from "@mui/material/Tab";
@@ -9,34 +9,22 @@ import TabPanel from "@mui/lab/TabPanel";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import api from "./utils/axiosInstance";
-import EditTaskModal from "./components/EditTaskModal";
 import Swal from "sweetalert2";
+import EditTaskModal from "./components/EditTaskModal";
 import TaskList from "./components/TaskList";
-import { ThemeProvider, createTheme } from "@mui/material/styles";
-import CssBaseline from "@mui/material/CssBaseline";
-
-const darkTheme = createTheme({
-  palette: {
-    mode: "dark",
-  },
-});
+import AddTaskForm from "./components/AddTaskForm";
 
 function App() {
   const [tasks, setTasks] = useState([]);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+  const [selectedTask, setSelectedTask] = useState(null);
 
   const [completedTasks, setCompletedTasks] = useState([]);
   const [uncompletedTasks, setUncompletedTasks] = useState([]);
 
-  const [editId, setEditId] = useState("");
-  const [editTitle, setEditTitle] = useState("");
-  const [editDescription, setEditDescription] = useState("");
-
   const [tabValue, setTabValue] = useState("1");
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isArchivedChecked, setIsArchivedChecked] = useState(true);
-  const [isBackdropOpen, setIsBackdropOpen] = useState(true);
+  const [isLoaderOpen, setIsLoaderOpen] = useState(true);
 
   const getTasks = async () => {
     try {
@@ -47,12 +35,9 @@ function App() {
     }
   };
 
-  const saveTask = async (event) => {
-    event.preventDefault();
+  const saveTask = async (title, description) => {
     try {
       await api.post("/", { title, description, status: false });
-      setTitle("");
-      setDescription("");
       getTasks();
     } catch (error) {
       console.error("Error adding task:", error);
@@ -85,19 +70,19 @@ function App() {
         title: "Deleted!",
         text: "Your file has been deleted.",
         icon: "success",
+        background: "#242424",
+        color: "white",
       });
     }
   };
 
-  const updateTask = async (event) => {
-    event.preventDefault();
+  const updateTask = async (taskId, title, description) => {
     try {
-      await api.put(`/${editId}`, {
-        title: editTitle,
-        description: editDescription,
+      await api.put(`/${taskId}`, {
+        title,
+        description,
       });
       getTasks();
-      setIsModalOpen(false);
     } catch (error) {
       console.error("Error updating task:", error);
     }
@@ -118,19 +103,12 @@ function App() {
     }
   };
 
-  const openModal = (id, title, description) => {
-    setIsModalOpen(true);
-    setEditId(id);
-    setEditTitle(title);
-    setEditDescription(description);
-  };
-
   useEffect(() => {
     const checkConnection = async () => {
       console.log(`Running in ${import.meta.env.MODE}`);
       try {
         const res = await api.get("/check");
-        setIsBackdropOpen(false);
+        setIsLoaderOpen(false);
         console.log("Connected to api", res);
       } catch (error) {
         console.log("Could not connect to api");
@@ -143,7 +121,6 @@ function App() {
   }, []);
 
   useEffect(() => {
-    // Update completed and uncompleted tasks whenever tasks change
     if (!isArchivedChecked) {
       setUncompletedTasks(tasks);
       setCompletedTasks([]);
@@ -157,108 +134,82 @@ function App() {
 
   return (
     <>
-      <ThemeProvider theme={darkTheme}>
-        <Paper className="main-box" elevation={8}>
-          <header className="header">
-            <span>Task Management</span>
-            <span>
-              {new Date().toLocaleDateString("en-PH", {
-                month: "long",
-                day: "numeric",
-                year: "numeric",
-              })}
-            </span>
-          </header>
+      <Paper
+        className="main-box"
+        sx={{
+          background: "oklch(21.1484% 0.01165 254.087939 / 1)",
+        }}
+        elevation={8}
+      >
+        <header className="header">
+          <span>Task Management</span>
+          <span>
+            {new Date().toLocaleDateString("en-PH", {
+              month: "long",
+              day: "numeric",
+              year: "numeric",
+            })}
+          </span>
+        </header>
 
-          <Box
-            className="form-group"
-            component="form"
-            onSubmit={saveTask}
-            autoComplete="off"
-          >
-            <TextField
-              required
-              inputProps={{ minLength: 3 }}
-              id="form-group__title"
-              label="Title"
-              variant="outlined"
-              size="small"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-            <TextField
-              required
-              inputProps={{ minLength: 3 }}
-              id="form-group__description"
-              label="Description"
-              variant="outlined"
-              size="small"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-            <Button type="submit" variant="contained">
-              Create
-            </Button>
+        <AddTaskForm saveTask={saveTask} />
+
+        <TabContext value={tabValue}>
+          <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+            <TabList onChange={(e, newValue) => setTabValue(newValue)}>
+              <Tab label="Active" value="1" />
+              <Tab label="Archived" value="2" />
+            </TabList>
           </Box>
-
-          <TabContext value={tabValue}>
-            <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-              <TabList onChange={(e, newValue) => setTabValue(newValue)}>
-                <Tab label="Active" value="1" />
-                <Tab label="Archived" value="2" />
-              </TabList>
-            </Box>
-            <TabPanel value="1" sx={{ padding: "0" }}>
-              <TaskList
-                tasks={uncompletedTasks}
-                openModal={openModal}
-                updateTaskStatus={updateTaskStatus}
-                deleteTask={deleteTask}
-              />
-            </TabPanel>
-            <TabPanel value="2" sx={{ padding: "0" }}>
-              <TaskList
-                tasks={completedTasks}
-                openModal={openModal}
-                updateTaskStatus={updateTaskStatus}
-                deleteTask={deleteTask}
-              />
-            </TabPanel>
-          </TabContext>
-
-          <Box className="footer">
-            <FormControlLabel
-              control={<Checkbox />}
-              label="Hide Completed Tasks"
-              onChange={(e) => setIsArchivedChecked(e.target.checked)}
-              checked={isArchivedChecked}
+          <TabPanel value="1" sx={{ padding: "0" }}>
+            <TaskList
+              tasks={uncompletedTasks}
+              updateTaskStatus={updateTaskStatus}
+              deleteTask={deleteTask}
+              setSelectedTask={setSelectedTask}
+              setIsModalOpen={setIsEditModalOpen}
             />
-          </Box>
-        </Paper>
+          </TabPanel>
+          <TabPanel value="2" sx={{ padding: "0" }}>
+            <TaskList
+              tasks={completedTasks}
+              updateTaskStatus={updateTaskStatus}
+              deleteTask={deleteTask}
+              setSelectedTask={setSelectedTask}
+              setIsModalOpen={setIsEditModalOpen}
+            />
+          </TabPanel>
+        </TabContext>
 
-        <EditTaskModal
-          isModalOpen={isModalOpen}
-          setIsModalOpen={setIsModalOpen}
-          title={editTitle}
-          description={editDescription}
-          setTitle={setEditTitle}
-          setDescription={setEditDescription}
-          onSubmit={updateTask}
-        />
+        <Box className="footer">
+          <FormControlLabel
+            control={<Checkbox />}
+            label="Hide Completed Tasks"
+            onChange={(e) => setIsArchivedChecked(e.target.checked)}
+            checked={isArchivedChecked}
+          />
+        </Box>
+      </Paper>
 
-        <Backdrop
-          sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
-          open={isBackdropOpen}
-        >
-          <div className="backdrop">
-            <CircularProgress color="inherit" />
-            <span>Please wait</span>
-            <span className="info">
-              This could take upto 50 seconds if the server had a coldstart
-            </span>
-          </div>
-        </Backdrop>
-      </ThemeProvider>
+      <EditTaskModal
+        isModalOpen={isEditModalOpen}
+        setIsModalOpen={setIsEditModalOpen}
+        selectedTask={selectedTask}
+        updateTask={updateTask}
+      />
+
+      <Backdrop
+        sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={isLoaderOpen}
+      >
+        <div className="backdrop">
+          <CircularProgress color="inherit" />
+          <span>Please wait</span>
+          <span className="info">
+            This could take upto 50 seconds if the server had a coldstart
+          </span>
+        </div>
+      </Backdrop>
     </>
   );
 }

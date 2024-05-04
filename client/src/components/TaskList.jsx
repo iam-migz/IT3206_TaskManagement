@@ -10,7 +10,13 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 
-function TaskList({ tasks, openModal, updateTaskStatus, deleteTask }) {
+function TaskList({
+  tasks,
+  setIsModalOpen,
+  updateTaskStatus,
+  deleteTask,
+  setSelectedTask,
+}) {
   return (
     <div className="task-list">
       {tasks &&
@@ -36,7 +42,10 @@ function TaskList({ tasks, openModal, updateTaskStatus, deleteTask }) {
             </div>
             <div>
               <IconButton
-                onClick={() => openModal(task.id, task.title, task.description)}
+                onClick={() => {
+                  setSelectedTask(task);
+                  setIsModalOpen(true);
+                }}
                 color="warning"
               >
                 <EditIcon />
