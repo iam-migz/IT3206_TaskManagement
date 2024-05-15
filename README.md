@@ -1,5 +1,6 @@
 # Task Mangement System
 - Project Requirement for IT 3206 (Integrative Programming and Technology)
+- Deployed Web App: https://iam-migz.github.io/IT3206_TaskManagement/
 
 ### Tech Stack:
 - Frontend
@@ -43,6 +44,17 @@ Returns a array of JSON object with the following properties:
 - `title`: Title of the task.
 - `description`: Description of the task.
 - `status`: Current status of the task wheather it was completed or not, Boolean.
+
+```json
+[
+  {
+    "id":"80kJvqy0EszN1Mrj649z",
+    "title":"study DSA",
+    "description":"linked list",
+    "status":false
+  }
+]
+```
 
 ---
 
@@ -93,8 +105,6 @@ Updates a task's status
 
 ### Response
 - returns a status code of `200 OK`
-
-
 
 
 
