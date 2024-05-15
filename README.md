@@ -113,3 +113,16 @@ This API uses the following error codes:
 - `400 Bad Request`: The request was malformed or missing required parameters.
 - `404 Not Found`: The requested resource was not found.
 - `500 Internal Server Error`: An unexpected error occurred on the server.
+
+
+### Members
+- MIGUEL ANGEL REYES
+- PHILIPPE PONCE TAN
+- JOSHUA PHILIP MELGAREJO ABABON
+- ANDRE CLEOFE LABENDIA
+- JANUSZ NRICKE LIM OMAMALIN
+- LORENZ LEO VILLAHERMOSA ROJAS
+- ROLAN DAVE IGOT PACAMPARA
+- VONNE BENEDICT BERTOS GELAGA
+- ALEXANDER JAMES VELEZ
+- CARL DAVE BILOTTINDOS BARRERA
